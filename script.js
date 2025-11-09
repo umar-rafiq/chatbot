@@ -1263,6 +1263,14 @@ const handleOutgoingMessage = (e, quickAction = null) => {
     
     if (!userData.message) return;
     
+    // Collapse quick actions section when chat starts
+    const quickActionsContainer = document.querySelector('.quick-actions-container');
+    if (quickActionsContainer && !quickActionsContainer.classList.contains('collapsed')) {
+        quickActionsContainer.classList.add('collapsed');
+        // Store state in localStorage
+        localStorage.setItem('quickActionsCollapsed', 'true');
+    }
+    
     // Clear input
     messageInput.value = "";
     messageInput.dispatchEvent(new Event("input"));
@@ -1371,6 +1379,12 @@ chatbotToggler.addEventListener("click", () => {
         messageInput.focus();
         // Check connection when opening
         checkConnection();
+        // Close quick actions if chat history exists (after prompt has been sent)
+        const quickActionsContainer = document.querySelector('.quick-actions-container');
+        if (quickActionsContainer && chatHistory.length > 0) {
+            quickActionsContainer.classList.add('collapsed');
+            localStorage.setItem('quickActionsCollapsed', 'true');
+        }
     }
 });
 
@@ -1437,10 +1451,11 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('quickActionsCollapsed', isCollapsed);
         };
         
-        // Restore state from localStorage
+        // Restore state from localStorage or close if chat history exists
         const savedState = localStorage.getItem('quickActionsCollapsed');
-        if (savedState === 'true') {
+        if (savedState === 'true' || chatHistory.length > 0) {
             quickActionsContainer.classList.add('collapsed');
+            localStorage.setItem('quickActionsCollapsed', 'true');
         }
         
         // Add click handlers
